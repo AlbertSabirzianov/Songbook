@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.shortcuts import render
 from one.models import Song, Part
 from .forms import SongForm, PartForm, SongSearchForm
-from .Albert import Post, World
+from .Albert import Post, World, WordTr
 
 
 def run(request):  # Быстрый поиск
@@ -37,7 +37,8 @@ def add(request):  # Страница добавления песни
             for i in files:
                 Part.objects.create(part=i, comp=f)
             count = len(Song.objects.filter(transcription=request.POST.get('transcription')))
-            return render(request, 'alldone.html', {'person': request.POST.get('transcription'), 'count': count})
+            return render(request, 'alldone.html', {'person': request.POST.get('transcription'), 'count': count,
+                                                    'word': WordTr(count).wr()})
     else:
         form = SongForm()
         formparts = PartForm()

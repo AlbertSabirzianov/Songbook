@@ -46,3 +46,18 @@ class World:
 
     def wr(self):
         return self.data[str(self.number)[-1]]
+
+
+class WordTr(World):
+    data = {
+        '0': 'ий',
+        '1': 'ию',
+        '2': 'ии',
+        '3': 'ии',
+        '4': 'ии',
+        '5': 'ий',
+        '6': 'ий',
+        '7': 'ий',
+        '8': 'ий',
+        '9': 'ий',
+    }
