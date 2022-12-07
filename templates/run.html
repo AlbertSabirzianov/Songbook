@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+<div class="search1">
+           <h4>Результаты поиска: {{ count }}</h4>
+           <hr>
+</div>
+<div class="search2">
+             {% if songs %}
+
+            <div class="row">
+              <div class="col-4">
+                <div id="list-example" class="list-group">
+                    <ul>
+                    {% for song in songs %}
+
+                <li class="list-group-item list-group-item-action" onclick="location.href='download/{{ song.pk }}';">
+
+                   <h2>{{ song.name }}</h2>
+
+                    {{ song.wrigth }}
+                    <br>
+
+
+                    <div class="blue_button">
+                        <button type="button" class="btn btn-outline-info">
+                        <a href="{{song.music}}" target="_blank">Слушать</a>
+                        </button>
+                        <button type="button" class="btn btn-outline-info">
+                        <a href="download/{{ song.pk }}" target="_blank" >Скачать ноты</a>
+                        </button>
+                    </div>
+
+                </li>
+                {% endfor %}
+
+                    </ul>
+                </div>
+              </div>
+
+            </div>
+
+</div>
+    <div class="like">
+        {% if songs.has_other_pages %}
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                {% if songs.has_previous %}
+                <li class="page-item">
+                     <a class="page-link" href="?page={{ songs.previos_page_number }}&q={{ q }}">&lt;</a>
+                 </li>
+                {% endif %}
+        {% for p in songs.paginator.page_range %}
+                {% if songs.number == p %}
+                <div>
+                     <li class="page-item">
+                         <a class="page-link" href="?page={{ p }}&q={{ q }}">{{ p }}</a>
+                     </li>
+                </div>
+                {% elif p >= songs.number|add:-1 and p <= songs.number|add:1 %}
+                 <li class="page-item">
+                     <a class="page-link" href="?page={{ p }}&q={{ q }}">{{ p }}</a>
+                 </li>
+                {% endif %}
+         {% endfor %}
+                {% if songs.has_next %}
+                <li class="page-item">
+                     <a class="page-link" href="?page={{ songs.next_page_number }}&q={{ q }}">&gt;</a>
+                 </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+     {% endif %}
+
+
+
+
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="row">
+              <div class="col-4">
+                <div id="list-example" class="list-group">
+                    <ul>
+
+                <li class="list-group-item list-group-item-action">
+
+                   <h2>{{ song.name }}</h2>
+
+                    {{ song.wrigth }}
+                    <br>
+                    Автор транскрипции: {{ song.transcription }}
+                    <br>
+                    Состав: {{ song.get_band }}
+                    <br>
+                    Стиль: {{ song.get_style }}
+                    <br>
+                    Наличие партитуры: {{ song.get_score}}
+                    <div class="blue_button">
+                        <button type="button" class="btn btn-outline-info">
+                        <a href="{{song.music}}" target="_blank">Слушать</a>
+                        </button>
+                    </div>
+
+                </li>
+
+
+
+                        <li class="list-group-item list-group-item-action">
+
+                      {% for part in parts%}
+                      <a href="{{ part.part.url }}" download="{{ part.part.url }}">{{ part }}</a>
+                       <br>
+                      {% endfor %}
+
+                        </li>
+                    </ul>
+                </div>
+              </div>
+</div>
+{% endblock %}

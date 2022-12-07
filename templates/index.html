@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h4>Новинки:</h4>
+Последние загруженные композиции <br><hr>
+
+<div class="row">
+    <div class="col-4">
+        <div id="list-example" class="list-group">
+                        <ul>
+                        {% for song in songs %}
+                            <li class="list-group-item list-group-item-action" onclick="location.href='download/{{ song.pk }}';">
+
+                               <h2>{{ song.name }}</h2>
+
+                                {{ song.wrigth }}
+                                <br>
+                                Автор транскрипции: {{ song.transcription }}
+                                <br>
+                                Состав: {{ song.get_band }}
+                                <br>
+                                Стиль: {{ song.get_style }}
+                                <br>
+                                Наличие партитуры: {{ song.get_score}}
+                                <div class="blue_button">
+                                <button type="button" class="btn btn-outline-info">
+                                    <a href="{{song.music}}" target="_blank">Слушать</a>
+                                </button>
+
+                                <button type="button" class="btn btn-outline-info">
+                                    <a href="download/{{ song.pk }}" target="_blank" >Скачать ноты</a>
+                                </button>
+                                </div>
+                            </li>
+
+                        {% endfor %}
+                        </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
