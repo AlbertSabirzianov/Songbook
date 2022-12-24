@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-)@x%8_m-23046%tu6$=+dbdpa4j+xuqo@f8+(+p)&#c!tryd18'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = []
 
@@ -77,8 +77,6 @@ DATABASES = {
         'NAME': 'Songbook',
         'USER': 'Albert',
         'PASSWORD': 'sae11478',
-        'HOST': 'pgdb',
-        'PORT': 5432,
     }
 }
 
