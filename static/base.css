@@ -125,6 +125,9 @@ img {
         width: 350%;
    }
 
+   .like {
+    position: initial;
+   }
 
 }
 
@@ -145,6 +148,10 @@ img {
 
     .row .col-4 ul {
         width: 350%;
+   }
+
+   .like {
+    position: initial;
    }
 }
 
@@ -207,6 +214,10 @@ img {
 
     .row .col-4 ul {
         width: 310%;
+   }
+
+   .like {
+    position: initial;
    }
 
 }
