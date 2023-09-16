@@ -1,124 +1,126 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+
 from one.models import Song, Part
+
 from .forms import SongForm, PartForm, SongSearchForm
-from .Albert import Post, World, WordTr
+from .utils import World, WordTr
+from .filters import SongFilter
 
 
-def run(request):  # Быстрый поиск
-    songs = Song.objects.order_by('name').filter(Q(name__icontains=request.GET.get('q')) | Q(wrigth__icontains=request.GET.get('q')))
-    count = len(songs)
+def run(request):
+    """Страница быстрого поиска."""
+
+    songs = Song.objects.filter(
+        Q(name__icontains=request.GET.get('q')) |
+        Q(wrigth__icontains=request.GET.get('q'))
+    )
     paginator = Paginator(songs, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'run.html', {'songs': page_obj, 'count': count, 'q': request.GET.get('q')})
+    context = {
+        'songs': page_obj,
+        'count': songs.count(),
+        'q': request.GET.get('q')
+    }
+    return render(request, 'run.html', context)
 
 
-def page(request):  # Новинки!
-    return render(request, 'index.html', {'songs': Song.objects.all().order_by('-time')[:3]})
+def page(request):
+    """Страница Новинок."""
+
+    context = {
+        'songs': Song.objects.all().order_by('-time')[:3]
+    }
+    return render(request, 'index.html', context)
 
 
-def mane_up(request):  # Главная страница
-    count = len(Song.objects.all())
+def mane_up(request):
+    """Главная страница."""
+
+    count = Song.objects.all().count()
     word = World(count).wr()
-    return render(request, 'mane_up.html', {'count': count, 'word': word})
+    context = {
+        'count': count,
+        'word': word
+    }
+    return render(request, 'mane_up.html', context)
 
 
-def add(request):  # Страница добавления песни
+def add(request):
+    """Страница добавления песни."""
+
     if request.method == 'POST':
         form = SongForm(request.POST)
-        formparts = PartForm()
         files = request.FILES.getlist('part')
         if form.is_valid() and files:
-            f = form.save()
-            Post(name=request.POST.get('transcription'), count=len(Song.objects.all()),
-                 comp=request.POST.get('name')).send()
-            for i in files:
-                Part.objects.create(part=i, comp=f)
-            count = len(Song.objects.filter(transcription=request.POST.get('transcription')))
-            return render(request, 'alldone.html', {'person': request.POST.get('transcription'), 'count': count,
-                                                    'word': WordTr(count).wr()})
-    else:
-        form = SongForm()
-        formparts = PartForm()
+            song = form.save()
+            for file in files:
+                Part.objects.create(part=file, comp=song)
+            count = Song.objects.filter(
+                transcription=request.POST.get('transcription')
+            ).count()
+            context = {
+                'person': request.POST.get('transcription'),
+                'count': count,
+                'word': WordTr(count).wr()
+            }
+            return render(request, 'alldone.html', context)
+
+        return render(request, 'errors.html', {'errors': form.errors})
+
+    form = SongForm()
+    formparts = PartForm()
     return render(request, 'add.html', {'form': form, 'formpart': formparts})
 
 
-def download(request, key):  # Страница скачивания нот песни
-    p = Part.objects.all().filter(comp=key)
-    song = Song.objects.get(pk=key)
-    return render(request, 'download.html', {'parts': p, 'song': song})
+def download(request, key):
+    """Страница скачивания нот песни."""
+
+    parts = Part.objects.all().filter(comp=key)
+    song = get_object_or_404(Song, pk=key)
+    context = {
+        'parts': parts,
+        'song': song
+    }
+    return render(request, 'download.html', context)
 
 
 def search(request):
-    if request.GET.get('have_score'):
-        if int(request.GET.get('band1')) == 0 and int(request.GET.get('style1')) == 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                have_score=True
-                                                                )
-        if int(request.GET.get('band1')) > 0 and int(request.GET.get('style1')) == 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                have_score=True,
-                                                                band=request.GET['band1']
-                                                                )
-        if int(request.GET.get('band1')) == 0 and int(request.GET.get('style1')) > 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                have_score=True,
-                                                                style=request.GET['style1']
-                                                                )
-        if int(request.GET.get('band1')) > 0 and int(request.GET.get('style1')) > 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                have_score=True,
-                                                                style=request.GET['style1'],
-                                                                band=request.GET['band1']
-                                                                )
-    else:
-        if int(request.GET.get('band1')) == 0 and int(request.GET.get('style1')) == 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                )
-        if int(request.GET.get('band1')) > 0 and int(request.GET.get('style1')) == 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                band=request.GET['band1']
-                                                                )
-        if int(request.GET.get('band1')) == 0 and int(request.GET.get('style1')) > 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                style=request.GET['style1']
-                                                                )
-        if int(request.GET.get('band1')) > 0 and int(request.GET.get('style1')) > 0:
-            search_songs = Song.objects.order_by('name').filter(name__icontains=request.GET['name'],
-                                                                wrigth__icontains=request.GET['wrigth'],
-                                                                transcription__icontains=request.GET['transcription'],
-                                                                style=request.GET['style1'],
-                                                                band=request.GET['band1']
-                                                                )
+    """Страница поиска песни."""
+
+    search_songs = SongFilter(request.GET, queryset=Song.objects.all()).qs
     paginator = Paginator(search_songs, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'search.html',
-                  {'form': SongSearchForm(request.GET), 'songs': page_obj, 'count': len(search_songs),
-                   'n': request.GET.get('name'), 'w': request.GET.get('wrigth'),
-                   't': request.GET.get('transcription'), 'h': request.GET.get('have_score'),
-                   'b': request.GET.get('band1'), 's': request.GET.get('style1')})
+    context = {
+        'form': SongSearchForm(request.GET),
+        'songs': page_obj,
+        'count': search_songs.count(),
+        'n': request.GET.get('name'),
+        'w': request.GET.get('wrigth'),
+        't': request.GET.get('transcription'),
+        'h': request.GET.get('have_score'),
+        'b': request.GET.get('band1'),
+        's': request.GET.get('style1')
+    }
+    return render(request, 'search.html', context)
 
 
 def search_one(request):
-    songs = Song.objects.order_by('name')
+    """
+    Первоначальная страница поика, отаброжает
+    все песни.
+    """
+
+    songs = Song.objects.all()
     paginator = Paginator(songs, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'search_one.html', {'form': SongSearchForm(), 'songs': page_obj, 'count': len(songs)})
+    context = {
+        'form': SongSearchForm(),
+        'songs': page_obj,
+        'count': songs.count()
+    }
+    return render(request, 'search_one.html', context)

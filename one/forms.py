@@ -1,4 +1,5 @@
 from django.forms import ModelForm, ClearableFileInput
+
 from .models import Song, Part, SongForSearch
 
 
@@ -26,5 +27,11 @@ class SongSearchForm(ModelForm):
 
     class Meta:
         model = SongForSearch
-        fields = ['name', 'wrigth', 'transcription', 'have_score', 'band1', 'style1']
-
+        fields = [
+            'name',
+            'wrigth',
+            'transcription',
+            'have_score',
+            'band1',
+            'style1'
+        ]

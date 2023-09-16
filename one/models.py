@@ -1,13 +1,26 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .validators import url_path_validator
+
 
 class Song(models.Model):
+    """
+    Модель композиции.
+    """
+
     name = models.CharField(_('Название'), max_length=30)
     wrigth = models.CharField(_('Композитор'), max_length=30)
     transcription = models.CharField(_('Автор транскрипции'), max_length=30)
     have_score = models.BooleanField(_('Наличие партитуры'), default=False)
-    music = models.CharField(_("Ссылка на музыкальный пример"), max_length=50, unique=False)
+    music = models.CharField(
+        _("Ссылка на музыкальный пример"),
+        max_length=50,
+        unique=False,
+        validators=[
+            url_path_validator,
+        ]
+    )
     time = models.DateTimeField(auto_now=True)
 
     data_score = {
@@ -54,8 +67,17 @@ class Song(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Композиция'
+        verbose_name_plural = 'Композиции'
+
 
 class Part(models.Model):
+    """
+    Модель партии.
+    """
+
     comp = models.ForeignKey(Song, on_delete=models.CASCADE)
     part = models.FileField(_('Ноты'), upload_to='media', null=False, blank=False)
 
@@ -64,6 +86,12 @@ class Part(models.Model):
 
 
 class SongForSearch(Song):
+    """
+    Модель композиции для поиска:
+    добавленна возможность не выбирать
+    состав и стиль.
+    """
+
     class Band(models.IntegerChoices):
         ZERO = 0, _('Состав не выбран')
         DUO = 1, _("Дуэт")
