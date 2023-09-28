@@ -16,6 +16,10 @@ python manage.py migrate
 ```commandline
 python manage.py runserver
 ```
+Загрузите тестовые данные
+```commandline
+python manage.py data_to_db
+```
 ## Делитесь аранжировками и транскрипциями онлайн!
 заходите на сайт [Songbook](https://yoursongbook.ru) 
 и пользуйтесь приложением онлайн!
